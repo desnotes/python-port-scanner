@@ -1,9 +1,12 @@
+
+# Created by Srce Cde
+
 import cx_Freeze
 import sys
 
 base = None
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     base = "Win32GUI"
 
 executables = [cx_Freeze.Executable("port_scanner.py", base=base, icon="icon.ico")]
@@ -14,4 +17,4 @@ cx_Freeze.setup(
     version = "0.01",
     description = "Fast and Multithreaded Port Scanner",
     executables = executables
-    )
+)

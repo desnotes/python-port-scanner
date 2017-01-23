@@ -1,4 +1,6 @@
-#A port scanner developed by Srce Cde
+
+# A port scanner developed by Srce Cde
+
 import os
 import tkinter as tk
 from tkinter import *
@@ -16,6 +18,8 @@ thread_lock = threading.Lock()
 target = str()
 res = str()
 w_res = []
+s_port = 1024
+
 
 f = open("out.txt", "w").close
 
@@ -27,7 +31,7 @@ class PortScanner(tk.Tk):
 
         tk.Tk.__init__(self, *args, **kwargs)
 
-        # tk.Tk.iconbitmap(self, default="@icon1.xbm")
+        # tk.Tk.iconbitmap(self, bitmap="@/home/Desktop/Python/Git Clone/python-port-scanner/icon2.png")
 
         tk.Tk.wm_title(self, "Mini Port Scanner")
 
@@ -70,36 +74,41 @@ class PortScanner(tk.Tk):
 class PortScannerUI(tk.Frame, PortScanner):
     global target
     global res
+    # global all_port_chk
 
     def __init__(self, parent, controller):
 
 
         tk.Frame.__init__(self, parent)
+        all_port_chk = IntVar()
 
         self.enter_host = tk.Label(parent, text="Enter Host", font=LARGE_FONT)
-        self.enter_host.grid(row=1, column=0, sticky="we", padx=30)
+        self.enter_host.grid(row=1, column=0, columnspan=1, sticky="w", padx=35, pady=20)
         self.enter_host.bind("<Control-KeyRelease-a>", lambda: ttk.enter_host.select_range(0, END))
 
 
         host_entry = tk.Entry(parent, text="get", width=40)
         host_entry.grid(row=1, column=1, sticky="w", padx=0)
 
-        host_scan = tk.Button(parent, text="Scan", command=lambda: self.scn_me(host_entry.get()))
-        host_scan.grid(row=1, column=3, sticky="e", padx=0)
+        lst_bx = tk.Checkbutton(parent, text="Scan All ports", variable=all_port_chk, offvalue=0, onvalue=1)
+        lst_bx.grid(row=2, column=0, sticky="ew", padx=10)
+
+        host_scan = tk.Button(parent, text="Scan", command=lambda: self.scn_me(host_entry.get(), all_port_chk.get()))
+        host_scan.grid(row=1, column=3, columnspan=3, sticky="w", padx=0)
 
         load_data = tk.Button(parent, text="Load Result", command=lambda: l_text())
-        load_data.grid(row=2, column=8, sticky="e", padx=0)
+        load_data.grid(row=3, column=8, sticky="w", padx=0)
 
         scroll= tk.Scrollbar(parent)
         result_text = tk.Text(parent, width=75, height=15)
 
-        scroll.grid(row=2, rowspan=7, column=3, columnspan=1, sticky="nse", pady=20, padx=1)
-        result_text.grid(row=2, column=0, columnspan=6, sticky="e", padx=35, pady=20)
+        scroll.grid(row=3, rowspan=7, column=2, columnspan=3, sticky="nse", pady=20, padx=1)
+        result_text.grid(row=3, column=0, columnspan=6, sticky="e", padx=35, pady=20)
 
         scroll.config(command=result_text.yview)
         result_text["yscrollcommand"] = scroll.set
 
-        info_label = tk.Label(parent, text="A fast and multi-threaded port scanner\nScanning popular ports from 1 - 1024", font=NORMAL_FONT)
+        info_label = tk.Label(parent, text="A fast and multi-threaded port scanner\nBy default it scan ports from 1 - 1024", font=NORMAL_FONT)
         info_label.grid(row=2, rowspan=2, column=1, columnspan=2, sticky="ws", padx=10)
 
         host_entry.focus_set()
@@ -124,10 +133,17 @@ class PortScannerUI(tk.Frame, PortScanner):
                         result_text.insert(END, op)
             fc = open('out.txt', 'w').truncate()
 
-    def scn_me(self, parms):
+    def scn_me(self, parms, all_port_chk):
+        global s_port
         global target
         ckc = chkcon()
         target = parms
+        pc = all_port_chk
+
+        if pc == 0:
+            s_port = 1024
+        else:
+            s_port = 65535
 
         if target == "" or not ckc:
             if target == "":
@@ -166,6 +182,8 @@ class run_scn_thread:
 
     def run_scan(self):
         global w_res
+        global s_port
+        print(s_port)
         try:
 
             ip = socket.gethostbyname(target)
@@ -188,7 +206,6 @@ class run_scn_thread:
             except:
                 pass
 
-            # print(dem)
             f = open('out.txt', 'w')
             f.write(str(w_res))
             f.close
@@ -206,7 +223,7 @@ class run_scn_thread:
             t.daemon = True
             t.start()
 
-        for worker in range(1, 1024):
+        for worker in range(1, s_port):
             q.put(worker)
             pass
 
@@ -222,6 +239,6 @@ class ImpPort(tk.Frame):
 
 ps = PortScanner()
 ps.geometry("720x400")
-# ps.iconbitmap("icon.ico")
+# ps.wm_iconbitmap(bitmap="@/home/Desktop/Python/Git Clone/python-port-scanner/icon2.png")
 ps.resizable(0, 0)
 ps.mainloop()
